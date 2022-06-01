@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="author" content="Max Kuo">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <meta name="description" content="">
+    <title></title>
+</head>
+
+<body>
+    <h1>WebSocket測試</h1>
+    <span>連線狀態：</span>
+    <span id="currentStatus">尚未連線</span>
+    <br>
+    <input id="name" type="text">
+    <span>to</span>
+    <input id="toName" type="text">
+    <button id="conn">連線</button>
+    <button id="broke">斷線</button>
+    <br>
+    <input id="message" type="text">
+    <button id="send">發送訊息</button>
+    <hr>
+    <div id="test"></div>
+</body>
+<script>
+    let websocket = null;
+    let currentStatus = document.getElementById("currentStatus");
+    let conn = document.getElementById("conn");
+    let broke = document.getElementById("broke");
+    let name = document.getElementById("name");
+    let toName = document.getElementById("toName");
+    let send = document.getElementById("send");
+    let message = document.getElementById("message");
+    let test = document.getElementById("test");
+
+    conn.addEventListener("click", () => {
+        connWebSocket();
+        currentStatus.innerHTML = "連線成功";
+        test.innerHTML += "連線成功" + "<br/>";
+    });
+
+    broke.addEventListener("click", () => {
+        closeWebSocket();
+        currentStatus.innerHTML = "中斷連線";
+        test.innerHTML += "中斷連線" + "<br/>";
+    });
+
+    send.addEventListener("click", () => {
+        let sendMsg = message.value;
+
+        if (toName.value != null && toName.value != "") {
+            sendMsg = sendMsg + "#" + toName.value;
+        }
+
+        sednMessage(sendMsg);
+    });
+
+    window.onbeforeunload = () => {
+        closeWebSocket();
+    }
+
+    function connWebSocket() {
+        if ('WebSocket' in window) {
+            websocket = new WebSocket(`ws://localhost:8080/websocket/${name.value}`);
+            websocket.onmessage = (e) => {
+                addReceiveMessage(e.data);
+            }
+        } else {
+            alert("失敗");
+        }
+    }
+
+    function closeWebSocket() {
+        websocket.close();
+    }
+
+    function addReceiveMessage(message) {
+        test.innerHTML += "Server：" + message + "<br/>";
+    }
+
+    function sednMessage(sendMsg) {
+        websocket.send(sendMsg);
+        test.innerHTML += "發送訊息：" + message.value + "<br/>";
+    }
+
+</script>
+
+</html>
